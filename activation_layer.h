@@ -13,7 +13,6 @@ double *arrtanh(double arr[], int n){
 }
 
 double *arrtanh_prime(double arr[], int n){
-    //printf("sioee: %d",ARRAYSIZE(arr));
     double *ret = (double *)malloc(sizeof(double *) *n);
     for(int i=0; i<n; i++){
         ret[i] = 1-pow(tanh(arr[i]), 2);
@@ -34,14 +33,17 @@ void init_ActivationLayer(struct ActivationLayer* AL, char* activation, char* ac
     strcpy(AL->activation_prime, activation_prime);
 }
 
-void act_forward_propogation(struct ActivationLayer* AL, double input_data[], int n){
+double *act_forward_propogation(struct ActivationLayer* AL, double input_data[], int n){
     for(int i=0;i<n; i++){
         AL->input[i] = input_data[i];
     }
+    double *ret = (double *)malloc(sizeof(double *) * n);
     double *temp = arrtanh(AL->input, n);
     for(int i=0;i<n;i++){
         AL->output[i] = temp[i];
+        ret[i] = AL->output[i];
     }
+    return ret;
 }
 
 double *act_backward_propogation(struct ActivationLayer* AL, double output_error[], int n, double learning_rate){

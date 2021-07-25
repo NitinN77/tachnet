@@ -15,10 +15,11 @@ struct DenseLayer {
     double output[1000];
 };
 
-void forward_propogation(struct DenseLayer* DL,double input_data[]){
+double *forward_propogation(struct DenseLayer* DL,double input_data[]){
     for(int i=0;i<DL->input_size;i++) {
         DL->input[i]=input_data[i];
     }
+    double *ret = (double *)malloc(sizeof(double *) * DL->output_size);
     for(int i=0;i<DL->output_size;i++){
         double sum = 0;
         for(int j=0;j<DL->input_size;j++){
@@ -26,7 +27,10 @@ void forward_propogation(struct DenseLayer* DL,double input_data[]){
         }
         DL->output[i] = sum + DL->bias[0][i];
     }
-
+    for(int i=0;i<DL->output_size;i++){
+        ret[i] = DL->output[i];
+    }
+    return ret;
 }
 
 double *backward_probogation(struct DenseLayer* DL,double output_error[], double learning_rate){
