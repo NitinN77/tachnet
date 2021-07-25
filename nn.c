@@ -141,11 +141,12 @@ static PyObject *model(PyObject *self, PyObject *args) {
 
 static PyObject *mfit(PyObject *self, PyObject *args) {
     PyObject *X_train, *y_train;
-    int xr, xc;
+    int xr, xc, epochs;
+    double lr;
     double xarr[100][3];
     double yarr[100];
 
-    if(!PyArg_ParseTuple(args, "OO", &X_train, &y_train)) {
+    if(!PyArg_ParseTuple(args, "OOid", &X_train, &y_train, &epochs, &lr)) {
         return NULL;
     }
 
@@ -163,7 +164,7 @@ static PyObject *mfit(PyObject *self, PyObject *args) {
         yarr[i] = PyFloat_AsDouble(e1);
     }
 
-    fit(&network, xarr, yarr, 100, 0.1);
+    fit(&network, xarr, yarr, epochs, lr);
     double *predictions = predict(&network, xarr);
     printf("\nPredictions: \n");
     for(int i=0;i<3;i++){
