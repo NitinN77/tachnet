@@ -1,7 +1,7 @@
 # Tachnet
 Deep-learning library written in C for Python
 
-## Initializing a neural network with given layer sizes
+## Initializing a neural network with given layer shapes
 
 ![](https://i.imgur.com/IhFaKZd.png)
 
