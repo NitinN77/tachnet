@@ -3,3 +3,5 @@ lib
 pyvenv.cfg
 build
 .vscode
+test.py
+a.out

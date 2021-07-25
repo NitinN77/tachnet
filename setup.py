@@ -6,7 +6,7 @@ def main():
           description="Astronomically fast deep learning library",
           author="Nitin Narayanan",
           author_email="nitinnarayanan77@gmail.com",
-          ext_modules=[Extension("tachnet", ["fastsqr.c"])])
+          ext_modules=[Extension("tachnet", ["nn.c"])])
 
 if __name__ == "__main__":
     main()

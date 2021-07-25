@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include <Python.h>
 #include<string.h>
 #include<math.h>
 #include "dense_layer.h"
@@ -9,6 +10,7 @@
 
 struct DenseLayer layers[100];
 struct ActivationLayer alayers[100];
+
 
 double mse(double y_true, double y_pred){
     return pow(y_true-y_pred, 2);
@@ -30,6 +32,7 @@ void init_Network(struct Network *NN){
 void addlayer(struct Network *NN, int input_size, int output_size){
     struct DenseLayer new_layer;
     struct ActivationLayer new_alayer;
+    init_ActivationLayer(&new_alayer, "tanh", "tanh_prime");
     init_DenseLayer(&new_layer, input_size, output_size);
     layers[NN->num_layers] = new_layer;
     alayers[NN->num_layers] = new_alayer;
@@ -42,7 +45,7 @@ void fit(struct Network *NN, double X_train[][3], double y_train[],int epochs,in
         double err = 0;
         for(int i=0;i<samples;i++){
             double output[1000] = {0};    
-            for(int j=0;j<ARRAYSIZE(X_train[0]);j++){
+            for(int j=0;j<(int)ARRAYSIZE(X_train[0]);j++){
                 output[i] = X_train[i][j];
             }
             for(int j=0;j<NN->num_layers;j++){
@@ -79,7 +82,7 @@ double *predict(struct Network *NN, double X_train[][3]){
     int counter=0;
         for(int i=0;i<samples;i++){
             double output[1000] = {0};    
-            for(int j=0;j<ARRAYSIZE(X_train[0]);j++){
+            for(int j=0;j<(int)ARRAYSIZE(X_train[0]);j++){
                 output[i] = X_train[i][j];
             }
 
@@ -98,21 +101,95 @@ double *predict(struct Network *NN, double X_train[][3]){
     return outputs;
 }
 
-int main(){
-    struct Network network;
-    init_Network(&network);
-    addlayer(&network, 3, 5);
-    addlayer(&network, 5, 1);
-    for(int i=0;i<network.num_layers;i++){
-        printf("layer no. %d INP: %d OP: %d\n", i, layers[i].input_size, layers[i].output_size);
+
+struct Network network;
+
+
+static PyObject *model(PyObject *self, PyObject *args) {
+    PyObject *int_list;
+    int len;
+    double *arr;
+
+    if(!PyArg_ParseTuple(args, "O", &int_list)) {
+        return NULL;
     }
-    double X_train[3][3] = {{1,1,1}, {0,0,0}, {1,0,1}};
-    double y_train[3] = {1,0,1};
-    fit(&network, X_train, y_train, 100, 0.1);
-    double *predictions = predict(&network, X_train);
+
+    len = PyObject_Length(int_list);
+    if (len < 0) return NULL;
+
+    arr = (double *)malloc(sizeof(double *) * len);
+    if (arr == NULL) return NULL;
+
+    for(int i = 0;i < len; i++){
+        PyObject *e;
+        e = PyList_GetItem(int_list, i);
+        if (!PyFloat_Check(e)) arr[i] = 0.0;
+        arr[i] = PyFloat_AsDouble(e);
+    }
+
+
+    init_Network(&network);
+
+    for(int i=0;i<len;i+=2){
+        addlayer(&network, arr[i], arr[i+1]);
+    }
+    for(int i=0;i<network.num_layers;i++){
+        printf("layer no. %d INP: %d OP: %d\n", i+1, layers[i].input_size, layers[i].output_size);
+    }
+    Py_RETURN_NONE;
+}
+
+static PyObject *mfit(PyObject *self, PyObject *args) {
+    PyObject *X_train, *y_train;
+    int xr, xc;
+    double xarr[100][3];
+    double yarr[100];
+
+    if(!PyArg_ParseTuple(args, "OO", &X_train, &y_train)) {
+        return NULL;
+    }
+
+    xr = PyObject_Length(X_train);
+    PyObject *temp = PyList_GetItem(X_train, 0);
+    xc = PyObject_Length(temp);
+
+    for(int i = 0;i < xr; i++){
+        PyObject *e, *e1;
+        e = PyList_GetItem(X_train, i);
+        for(int j=0;j<xc;j++){
+            xarr[i][j] = PyFloat_AsDouble(PyList_GetItem(e, j));
+        }
+        e1 = PyList_GetItem(y_train, i);
+        yarr[i] = PyFloat_AsDouble(e1);
+    }
+
+    fit(&network, xarr, yarr, 100, 0.1);
+    double *predictions = predict(&network, xarr);
     printf("\nPredictions: \n");
     for(int i=0;i<3;i++){
         printf("%g ", predictions[i]);
     }
     printf("\n");
+    Py_RETURN_NONE;
+}
+
+
+
+static PyMethodDef Methods[] = {
+    {"model", model, METH_VARARGS, "neural network initalisation"},
+    {"fit", mfit, METH_VARARGS, "neural network training"},
+    {NULL, NULL, 0, NULL}
+};
+
+
+static struct PyModuleDef tachnet = {
+    PyModuleDef_HEAD_INIT,
+    "tachnet",
+    "Astronomically fast deep learning library",
+    -1,
+    Methods
+};
+
+PyMODINIT_FUNC PyInit_tachnet(void) {
+    return PyModule_Create(&tachnet);
 }

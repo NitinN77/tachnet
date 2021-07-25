@@ -29,8 +29,7 @@ struct ActivationLayer{
 };
 
 void init_ActivationLayer(struct ActivationLayer* AL, char* activation, char* activation_prime){
-    strcpy(AL->activation, activation);
-    strcpy(AL->activation_prime, activation_prime);
+    return;
 }
 
 double *act_forward_propogation(struct ActivationLayer* AL, double input_data[], int n){
