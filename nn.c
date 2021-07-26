@@ -23,10 +23,14 @@ double mse_prime(double y_true, double y_pred){
 
 struct Network{
     int num_layers;
+    int input_size;
 };
+
+struct Network network;
 
 void init_Network(struct Network *NN){
     NN->num_layers = 0;
+    NN->input_size = 0;
 }
 
 void addlayer(struct Network *NN, int input_size, int output_size){
@@ -39,7 +43,7 @@ void addlayer(struct Network *NN, int input_size, int output_size){
     NN->num_layers++;
 }
 
-void fit(struct Network *NN, double X_train[][3], double y_train[],int epochs,int learning_rate){
+void fit(struct Network *NN, int N, double X_train[][N], double y_train[],int epochs,int learning_rate){
     int samples = 3;
     for(int eno=0;eno<epochs;eno++){
         double err = 0;
@@ -76,7 +80,7 @@ void fit(struct Network *NN, double X_train[][3], double y_train[],int epochs,in
     }
 }
 
-double *predict(struct Network *NN, double X_train[][3]){
+double *predict(struct Network *NN, int N, double X_train[][N]){
     int samples = 3;
     double *outputs = (double *)malloc(sizeof(double *) * 1000);
     int counter=0;
@@ -102,7 +106,6 @@ double *predict(struct Network *NN, double X_train[][3]){
 }
 
 
-struct Network network;
 
 
 static PyObject *model(PyObject *self, PyObject *args) {
@@ -129,6 +132,7 @@ static PyObject *model(PyObject *self, PyObject *args) {
 
 
     init_Network(&network);
+    network.input_size = arr[0];
 
     for(int i=0;i<len;i+=2){
         addlayer(&network, arr[i], arr[i+1]);
@@ -143,6 +147,7 @@ static PyObject *mfit(PyObject *self, PyObject *args) {
     PyObject *X_train, *y_train;
     int xr, xc, epochs;
     double lr;
+    int N = network.input_size;
     double xarr[100][3];
     double yarr[100];
 
@@ -164,8 +169,8 @@ static PyObject *mfit(PyObject *self, PyObject *args) {
         yarr[i] = PyFloat_AsDouble(e1);
     }
 
-    fit(&network, xarr, yarr, epochs, lr);
-    double *predictions = predict(&network, xarr);
+    fit(&network, N, xarr, yarr, epochs, lr);
+    double *predictions = predict(&network, N,xarr);
     printf("\nPredictions: \n");
     for(int i=0;i<3;i++){
         printf("%g ", predictions[i]);
