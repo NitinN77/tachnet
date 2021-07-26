@@ -60,6 +60,7 @@ void fit(struct Network *NN, int N, double X_train[][N], double y_train[],int ep
                 }
                 free(op);
                 free(op1);
+                
             } 
             err += mse(y_train[i], output[0]);
             double error = mse_prime(y_train[i], output[0]);
