@@ -1,4 +1,5 @@
 # Tachnet
+# <b>NOT BEING WORKED ON ANYMORE, I'm working on a rust alternative with a lot more features. </b>
 Deep-learning library written in C for Python
 
 ## Initializing a neural network with given layer shapes
