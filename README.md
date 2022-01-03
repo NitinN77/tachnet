@@ -1,5 +1,5 @@
 # Tachnet
-# <b>NOT BEING WORKED ON ANYMORE
+# <b>NO LONGER BEING WORKED ON.
 
 ## Initializing a neural network with given layer shapes
 
